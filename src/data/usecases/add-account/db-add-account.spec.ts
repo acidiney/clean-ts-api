@@ -1,10 +1,5 @@
-import { AddAccount, Encrypter } from './db-add-account-protocols'
 import { DbAddAccount } from './db-add-account'
-
-interface SutTypes {
-  sut: AddAccount
-  encrypterStub: Encrypter
-}
+import { AddAccountRepository, AccountModel, AddAccount, AddAccountModel, Encrypter } from './db-add-account-protocols'
 
 const makeEncrypter = (): Encrypter => {
   class EncrypterStub implements Encrypter {
@@ -15,13 +10,38 @@ const makeEncrypter = (): Encrypter => {
 
   return new EncrypterStub()
 }
+
+const makeAddAccountRepository = (): AddAccountRepository => {
+  class AddAccountRepositoryStub implements AddAccountRepository {
+    async add (_: AddAccountModel): Promise<AccountModel> {
+      return {
+        id: 'valid_id',
+        name: 'valid_name',
+        email: 'valid_email@mail.com',
+        password: 'hashed_value'
+      }
+    }
+  }
+
+  return new AddAccountRepositoryStub()
+}
+
+interface SutTypes {
+  sut: AddAccount
+  encrypterStub: Encrypter
+  addAccountRepositoryStub: AddAccountRepository
+}
+
 const makeSut = (): SutTypes => {
   const encrypterStub = makeEncrypter()
 
-  const sut = new DbAddAccount(encrypterStub)
+  const addAccountRepositoryStub = makeAddAccountRepository()
+
+  const sut = new DbAddAccount(encrypterStub, addAccountRepositoryStub)
 
   return {
     encrypterStub,
+    addAccountRepositoryStub,
     sut
   }
 }
@@ -57,5 +77,25 @@ describe('DbAddAccount UseCase', function () {
     const promise = sut.add(account)
 
     await expect(promise).rejects.toThrow()
+  })
+
+  test('should call AddAccountRepository with correct account', async () => {
+    const { sut, addAccountRepositoryStub } = makeSut()
+
+    const addAccountRepositorySpy = jest.spyOn(addAccountRepositoryStub, 'add')
+
+    const account = {
+      name: 'valid_name',
+      email: 'valid_email@mail.com',
+      password: 'valid_password'
+    }
+
+    await sut.add(account)
+
+    expect(addAccountRepositorySpy).toHaveBeenCalledWith({
+      name: 'valid_name',
+      email: 'valid_email@mail.com',
+      password: 'hashed_value'
+    })
   })
 })
