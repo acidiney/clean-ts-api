@@ -2,7 +2,7 @@
 import bcrypt from 'bcrypt'
 import { BcryptAdapter } from './bcrypt-adapter'
 
-describe('Bcrypter Adapter', () => {
+describe('Bcrypt Adapter', () => {
   test('should call bcrypt with correct values', async () => {
     const salt = 12
 
