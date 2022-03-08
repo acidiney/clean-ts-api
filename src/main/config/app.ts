@@ -1,8 +1,10 @@
 import express from 'express'
-import { loadMiddlewares } from './middlewares'
+import { registerMiddlewares } from './middlewares'
+import { registerRoutes } from './routes'
 
 const app = express()
 
-loadMiddlewares(app)
+registerMiddlewares(app)
+registerRoutes(app)
 
 export { app }
