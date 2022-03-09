@@ -17,10 +17,21 @@ const makeControllerStub = (): Controller => {
   return new ControllerStub()
 }
 
+interface SutTypes {
+  sut: LogControllerDecorator
+  controllerStub: Controller
+}
+
+const makeSut = (): SutTypes => {
+  const controllerStub = makeControllerStub()
+  const sut = new LogControllerDecorator(controllerStub)
+
+  return { sut, controllerStub }
+}
+
 describe('LogControllerDecorator', function () {
   it('should call controller handle ', async function () {
-    const controllerStub = makeControllerStub()
-    const sut = new LogControllerDecorator(controllerStub)
+    const { sut, controllerStub } = makeSut()
 
     const handleSpy = jest.spyOn(controllerStub, 'handle')
 
@@ -37,4 +48,6 @@ describe('LogControllerDecorator', function () {
 
     expect(handleSpy).toHaveBeenCalledWith(httpRequest)
   })
+
+  // shoul')
 })
